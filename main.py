@@ -12,11 +12,17 @@ def parseChat(chatPath):
 
     while i < len(lines):
         if 'Messages to this chat and calls are now secured with end-to-end encryption.' in lines[i] \
-            or 'changed their phone number. You\'re currently chatting with their' in lines[i]:
+            or 'changed their phone number. You\'re currently chatting with their' in lines[i] \
+            or 'Messages to this group are now secured with end-to-end encryption.' in lines[i] \
+            or 'created group' in lines[i] \
+            or 'added you' in lines[i] or 'You\'re now admin' in lines[i] \
+            or 'You changed the subject from ' in lines[i] \
+            or 'removed' in lines[i] \
+            or 'changed the group description' in lines[i]:
             i += 1
             continue
 
-        if bool(re.match(r'.+/.+/.+, ..:..', lines[i])):
+        if bool(re.match(r'(.+/.+/.+), (..:..) - (.+):', lines[i])):
             messages.append(lines[i].strip())
         else:
             messages[-1] = messages[-1] + " " + lines[i].strip()
@@ -54,9 +60,10 @@ def wordFrequencies(df, stopwordFilter = False):
     if stopwordFilter:
         nltk.download('stopwords')
         english_stopwords = nltk.corpus.stopwords.words('english')
+        italian_stopwords = nltk.corpus.stopwords.words('italian')
 
         for word in counts.keys():
-            if word in english_stopwords: 
+            if word in english_stopwords or word in italian_stopwords: 
                 to_delete.append(word)
                
     for word in to_delete:
