@@ -11,18 +11,22 @@ def parseChat(chatPath):
     i = 0
 
     while i < len(lines):
-        if bool(re.match(r'.+/.+/.., ..:..', lines[i])):
+        if 'Messages to this chat and calls are now secured with end-to-end encryption.' in lines[i] \
+            or 'changed their phone number. You\'re currently chatting with their' in lines[i]:
+            i += 1
+            continue
+
+        if bool(re.match(r'.+/.+/.+, ..:..', lines[i])):
             messages.append(lines[i].strip())
         else:
             messages[-1] = messages[-1] + " " + lines[i].strip()
         i += 1
 
-    def splitS(s):
-        regex = re.match(r'(.+/.+/.., ..:..) - (.+): ([\s\S]+)', s)
+    def splitS(s): 
+        regex = re.match(r'(.+/.+/.+, ..:..) - (.+): ([\s\S]+)', s)
         timestamp = regex.group(1)
         author = regex.group(2)
         message = regex.group(3)
-
         return [timestamp, author, message]
 
     df = pd.DataFrame(columns = ['timestamp', 'author', 'message'])
@@ -86,3 +90,4 @@ if __name__ == '__main__':
 
     print("\nA random phrase generated from the whole chat: ")
     print(generatePhrase(df))
+
