@@ -67,7 +67,7 @@ def generatePhrase(df, author = None):
     if author:
         df = df[df.author == author]
 
-    model = markovify.NewlineText(df.message, state_size = 2)
+    model = markovify.Text(df.message, state_size = 2)
     while True:    
         sentence = model.make_sentence()
         if sentence != None:
