@@ -11,21 +11,12 @@ def parseChat(chatPath):
     i = 0
 
     while i < len(lines):
-        if 'Messages to this chat and calls are now secured with end-to-end encryption.' in lines[i] \
-            or 'changed their phone number. You\'re currently chatting with their' in lines[i] \
-            or 'Messages to this group are now secured with end-to-end encryption.' in lines[i] \
-            or 'created group' in lines[i] \
-            or 'added you' in lines[i] or 'You\'re now admin' in lines[i] \
-            or 'You changed the subject from ' in lines[i] \
-            or 'removed' in lines[i] \
-            or 'changed the group description' in lines[i]:
-            i += 1
-            continue
-
-        if bool(re.match(r'(.+/.+/.+), (..:..) - (.+):', lines[i])):
+        if bool(re.match(r'(.+/.+/.+), (..:..) - (.+):', lines[i])): # CORRECT MESSAGE
             messages.append(lines[i].strip())
+        elif bool(re.match(r'.+/.+/.+, (..:..)', lines[i])): # SYSTEM MESSAGE, ONLY DATE PRESENT
+            pass
         else:
-            messages[-1] = messages[-1] + " " + lines[i].strip()
+            messages[-1] = messages[-1] + " " + lines[i].strip() # CONTINUATION OF MESSAGE
         i += 1
 
     def splitS(s): 
