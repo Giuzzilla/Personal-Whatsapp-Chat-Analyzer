@@ -11,6 +11,7 @@ def parseChat(chatPath):
     i = 0
 
     while i < len(lines):
+        lines[i] = lines[i].replace('\u200e', '')
         if bool(re.match(r'(.+/.+/.+), (..:..) - (.+):', lines[i])): # CORRECT MESSAGE
             messages.append(lines[i].strip())
         elif bool(re.match(r'.+/.+/.+, (..:..)', lines[i])): # SYSTEM MESSAGE, ONLY DATE PRESENT
@@ -32,7 +33,7 @@ def parseChat(chatPath):
     df['timestamp'] = messageSeries.transform(lambda s: splitS(s)[0])
     df['author'] = messageSeries.transform(lambda s: splitS(s)[1])
     df['message'] = messageSeries.transform(lambda s: splitS(s)[2])
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
 
     return df
 
@@ -42,7 +43,7 @@ def avgTimeBtwn(df):
     return pd.Series(df.timestamp - df.shift().timestamp).mean()
 
 
-def wordFrequencies(df, stopwordFilter = False):
+def wordFrequencies(df, stopwordFilter=False):
     counts = df.message.str.lower().str.split(expand=True).stack().value_counts()
     counts = dict(counts)
 
@@ -62,18 +63,21 @@ def wordFrequencies(df, stopwordFilter = False):
 
     return counts
 
-
-def generatePhrase(df, author = None):
+def generateModel(df, author=None):
     if author:
         df = df[df.author == author]
+    return markovify.Text(df.message, state_size=2)
 
-    model = markovify.Text(df.message, state_size = 2)
-    while True:    
+def generatePhraseFromModel(model):
+    while True:
         sentence = model.make_sentence()
         if sentence != None:
             break
     return sentence
 
+def generatePhrase(df, author=None):
+    model = generateModel(df, author)
+    return generatePhraseFromModel(model)
 
 if __name__ == '__main__':
     import sys
